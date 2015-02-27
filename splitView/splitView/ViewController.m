@@ -12,11 +12,12 @@
 @property (weak, nonatomic) IBOutlet UIView *slider;
 @property (strong, nonatomic) IBOutlet UIPanGestureRecognizer *myPan;
 @property (weak, nonatomic) IBOutlet UIView *secondView;
+@property (weak, nonatomic) IBOutlet UIButton *myButton;
+
 
 @end
 
 @implementation ViewController
-
 - (void)viewDidLoad {
     [super viewDidLoad];
     [self.myButton setTitle:@"show" forState:UIControlStateNormal];
@@ -43,11 +44,13 @@
     }
 }
 -(void)moveRight{
-    [UIView animateWithDuration:0.5 animations:^{
+    [UIView animateWithDuration:0.3 animations:^{
         self.slider.frame = CGRectMake(0, 28, 60, 568);
         CGRect rect = self.secondView.frame;
         self.secondView.frame = CGRectMake(rect.origin.x+60,rect.origin.y, rect.size.width, rect.size.height);
     }];
+    //NSLog(@"slider center: %f", self.slider.center.x);
+    //NSLog(@"view center: %f", self.secondView.center.x);
 }
 -(void)moveBack{
     [UIView animateWithDuration:0.3 animations:^{
@@ -55,40 +58,76 @@
         CGRect rect = self.secondView.frame;
         self.secondView.frame = CGRectMake(rect.origin.x-60,rect.origin.y, rect.size.width, rect.size.height);
     }];
+    //NSLog(@"slider center: %f", self.slider.center.x);
+    //NSLog(@"view center: %f", self.secondView.center.x);
 }
+
 -(IBAction)movement:(UIPanGestureRecognizer *)pan{
     CGPoint translatedPoint = [pan translationInView:self.secondView];
-    CGPoint velocity = [pan velocityInView:[pan view]];
-    NSLog(@"velocity x: %f", velocity.x);
-    NSLog(@"translated x: %f", translatedPoint.x);
-   
-    if (pan.state == UIGestureRecognizerStateBegan) {
-            }
-    if (pan.state == UIGestureRecognizerStateChanged) {
-        NSLog(@"position x: %f", self.slider.frame.origin.x);
-        if ((self.slider.frame.origin.x>=-60)&&(self.slider.frame.origin.x <=0)) {
-            self.secondView.center = CGPointMake(self.secondView.center.x + translatedPoint.x, self.secondView.center.y);
-            self.slider.center = CGPointMake(self.slider.center.x+translatedPoint.x, self.slider.center.y);
-            [pan setTranslation:CGPointMake(0, 0) inView:self.secondView];
+    //CGPoint velocity = [pan velocityInView:[pan view]];
+    //NSLog(@"velocity x: %f", velocity.x);
+    //NSLog(@"translated x: %f", translatedPoint.x);
+    
+    switch (pan.state) {
+        case UIGestureRecognizerStateBegan:{
+            //NSLog(@"x: %f", self.secondView.frame.origin.x);
+            break;
         }
-    }
-        if (pan.state == UIGestureRecognizerStateEnded) {
-            CGPoint position = self.slider.frame.origin;
-            if (position.x<-60) {
+        case UIGestureRecognizerStateChanged:{
+            //NSLog(@"position x: %f", self.slider.frame.origin.x);
+            if ((self.slider.frame.origin.x>=-60)&&(self.slider.frame.origin.x <=0) && (self.secondView.frame.origin.x>=27.5)) {
+                if (translatedPoint.x>60) {
+                    translatedPoint.x = 60;
+                }
+                if (translatedPoint.x<-60) {
+                    translatedPoint.x = -60;
+                }
+                CGPoint p = CGPointMake(self.secondView.center.x + translatedPoint.x, self.secondView.center.y);
+                CGPoint p2 = CGPointMake(self.slider.center.x+translatedPoint.x, self.slider.center.y);
+                if ((p.x < -30)&&(p2.x<160)) {
+                    p.x = -30;
+                    p2.x = 160;
+                }
+                self.secondView.center = p;
+                self.slider.center = p2;
+                [pan setTranslation:CGPointMake(0, 0) inView:self.secondView];
+            }
+            break;
+        }
+        case UIGestureRecognizerStateEnded:{
+            CGRect slider = self.slider.frame;
+            CGRect view = self.secondView.frame;
+            if (slider.origin.x<-60 || view.origin.x<27.5) {
                 CGFloat f = -60;
-                self.slider.frame = CGRectMake(f, self.slider.frame.origin.y, self.slider.frame.size.width, self.slider.frame.size.height);
+                CGFloat f2 = 27.5;
+                self.slider.frame = CGRectMake(f, slider.origin.y, slider.size.width, slider.size.height);
+                self.secondView.frame = CGRectMake(f2, view.origin.y, view.size.width, view.size.height);
                 [self.myButton setTitle:@"show" forState:UIControlStateNormal];
-                NSLog(@"%@", @"Returning to -60");
-                NSLog(@"position x: %f", self.slider.frame.origin.x);
-            }
-            if (position.x>0) {
+                
+            } else if (slider.origin.x>0 || view.origin.x>87.5) {
                 CGFloat f = 0;
-                self.slider.frame = CGRectMake(f, self.slider.frame.origin.y, self.slider.frame.size.width, self.slider.frame.size.height);
+                CGFloat f2 = 87.5;
+                self.slider.frame = CGRectMake(f, slider.origin.y, slider.size.width, slider.size.height);
+                self.secondView.frame = CGRectMake(f2, view.origin.y, view.size.width, view.size.height);
                 [self.myButton setTitle:@"hide" forState:UIControlStateNormal];
-                NSLog(@"%@", @"Returning to 0");
-                NSLog(@"position x: %f", self.slider.frame.origin.x);
+                
+            } else if ((slider.origin.x<=-30)&&(slider.origin.x>=-60)) {
+                [UIView animateWithDuration:0.3 animations:^{
+                    self.slider.frame = CGRectMake(-60, 28, 60, 568);
+                    CGRect rect = self.secondView.frame;
+                    self.secondView.frame = CGRectMake(rect.origin.x+slider.origin.x,rect.origin.y, rect.size.width, rect.size.height);
+                }];
+            } else if ((slider.origin.x>-30)&&(slider.origin.x<=0)){
+                [UIView animateWithDuration:0.3 animations:^{
+                    self.slider.frame = CGRectMake(0, 28, 60, 568);
+                    CGRect rect = self.secondView.frame;
+                    self.secondView.frame = CGRectMake(rect.origin.x-slider.origin.x,rect.origin.y, rect.size.width, rect.size.height);
+                }];
             }
-            
+            break;
+        }
+        default:
+            break;
     }
 
     

@@ -9,8 +9,6 @@
 #import <UIKit/UIKit.h>
 
 @interface ViewController : UIViewController
-@property (weak, nonatomic) IBOutlet UIButton *myButton;
-
 - (IBAction)clicked:(id)sender;
 -(void)moveRight;
 -(void)moveBack;
