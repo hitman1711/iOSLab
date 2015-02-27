@@ -17,6 +17,7 @@
                                 <autoresizingMask key="autoresizingMask" flexibleMinX="YES" flexibleMaxX="YES" flexibleMinY="YES" flexibleMaxY="YES"/>
                                 <color key="backgroundColor" red="0.85882359740000003" green="0.023529414089999999" blue="0.03529411927" alpha="1" colorSpace="deviceRGB"/>
                                 <gestureRecognizers/>
+                                <inset key="insetFor6xAndEarlier" minX="-30" minY="0.0" maxX="30" maxY="0.0"/>
                             </view>
                             <view contentMode="redraw" id="Cl7-S0-9w5">
                                 <rect key="frame" x="0.0" y="0.0" width="320" height="568"/>
