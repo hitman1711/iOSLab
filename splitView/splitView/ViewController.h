@@ -10,7 +10,7 @@
 
 @interface ViewController : UIViewController
 - (IBAction)clicked:(id)sender;
--(void)moveRight;
--(void)moveBack;
+-(void)moveRight:(CGFloat)sliderX;
+-(void)moveBack:(CGFloat)sliderX;
 @end
 

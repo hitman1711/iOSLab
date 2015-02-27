@@ -10,13 +10,14 @@
 
 @interface ViewController (){
     CGFloat height;
+    CGFloat width;
+    CGFloat leftBorderOfView;
+    CGFloat verticalPaddingOfSlider;
 }
 @property (weak, nonatomic) IBOutlet UIView *slider;
 @property (strong, nonatomic) IBOutlet UIPanGestureRecognizer *myPan;
 @property (weak, nonatomic) IBOutlet UIView *secondView;
 @property (weak, nonatomic) IBOutlet UIButton *myButton;
-
-
 @end
 
 @implementation ViewController
@@ -24,82 +25,67 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
     [self.myButton setTitle:@"show" forState:UIControlStateNormal];
-    CGRect rect = self.slider.frame;
     height = [UIScreen mainScreen].applicationFrame.size.height;
-    self.slider.frame = CGRectMake(-60, 28, 60, height);
-    
-}
-
-- (void)didReceiveMemoryWarning {
-    [super didReceiveMemoryWarning];
-    // Dispose of any resources that can be recreated.
+    width = 60;
+    verticalPaddingOfSlider = 28;
+    leftBorderOfView = -60;
+    self.slider.frame = CGRectMake(0, -verticalPaddingOfSlider, width, height);
+    self.secondView.frame = CGRectMake(leftBorderOfView, self.secondView.frame.origin.y, self.secondView.frame.size.width, self.secondView.frame.size.height);
 }
 
 - (IBAction)clicked:(id)sender {
     UIButton *button = sender;
     if ([button.titleLabel.text isEqualToString:@"hide"]) {
         [self.myButton setTitle:@"show" forState:UIControlStateNormal];
-        [self moveBack:-60];
+        [self moveBack:leftBorderOfView];
     } else if ([button.titleLabel.text isEqualToString:@"show"]){
         [self.myButton setTitle:@"hide" forState:UIControlStateNormal];
-        [self moveRight:self.slider.frame.origin.x];
+        [self moveRight:leftBorderOfView];
     }
 }
--(void)moveRight:(CGFloat)sliderX{
-    [UIView animateWithDuration:0.3 animations:^{
-        self.slider.frame = CGRectMake(0, 28, 60, height);
+-(void)moveRight:(CGFloat)transition{
+    [UIView animateWithDuration:0.4 animations:^{
         CGRect rect = self.secondView.frame;
-        self.secondView.frame = CGRectMake(rect.origin.x-sliderX,rect.origin.y, rect.size.width, rect.size.height);
+        self.secondView.frame = CGRectMake(0,rect.origin.y, rect.size.width, rect.size.height);
     }];
 }
--(void)moveBack:(CGFloat)sliderX{
-    [UIView animateWithDuration:0.3 animations:^{
-        self.slider.frame = CGRectMake(-60, 28, 60, height);
+-(void)moveBack:(CGFloat)transition{
+    [UIView animateWithDuration:0.4 animations:^{
         CGRect rect = self.secondView.frame;
-        self.secondView.frame = CGRectMake(rect.origin.x+sliderX,rect.origin.y, rect.size.width, rect.size.height);
+        self.secondView.frame = CGRectMake(leftBorderOfView,rect.origin.y, rect.size.width, rect.size.height);
     }];
 }
 
 -(IBAction)movement:(UIPanGestureRecognizer *)pan{
     CGPoint translatedPoint = [pan translationInView:self.secondView];
-    CGRect slider = self.slider.frame;
+    CGPoint velocity = [pan velocityInView:self.secondView];
     CGRect view = self.secondView.frame;
-    //CGPoint velocity = [pan velocityInView:[pan view]];
-    
     switch (pan.state) {
         case UIGestureRecognizerStateBegan:{
             break;
         }
         case UIGestureRecognizerStateChanged:{
-            if ((self.slider.frame.origin.x>=-60)&&(self.slider.frame.origin.x <=0) && (self.secondView.frame.origin.x>=27.5)) {
-                CGPoint p = CGPointMake(self.secondView.center.x + translatedPoint.x, self.secondView.center.y);
-                CGPoint p2 = CGPointMake(self.slider.center.x+translatedPoint.x, self.slider.center.y);
-                NSLog(@"px: %f", p.x);
-                if (p2.x>30 && p.x>247){
-                    p2.x = 30;
-                    p.x=247;
+                CGFloat leftBorderForCenterOfView = 100;
+                CGFloat rightBorderForCenterOfView = 160;
+                CGPoint newView = CGPointMake(self.secondView.center.x + translatedPoint.x, self.secondView.center.y);
+                if (newView.x>rightBorderForCenterOfView){
+                    newView.x=rightBorderForCenterOfView;
+                } else if (newView.x<leftBorderForCenterOfView){
+                    newView.x = leftBorderForCenterOfView;
                 }
-                self.secondView.center = p;
-                self.slider.center = p2;
-                NSLog(@"view: %f", self.secondView.center.x);
+                self.secondView.center = newView;
+                NSLog(@"view: %f", view.origin.x);
                 [pan setTranslation:CGPointMake(0, 0) inView:self.secondView];
             break;
-            }
         }
         case UIGestureRecognizerStateEnded:{
-            if (slider.origin.x<-60 || view.origin.x<27.5) {
-                CGFloat f = -60;
-                CGFloat f2 = 27.5;
-                self.slider.frame = CGRectMake(f, slider.origin.y, slider.size.width, slider.size.height);
-                self.secondView.frame = CGRectMake(f2, view.origin.y, view.size.width, view.size.height);
-                [self.myButton setTitle:@"show" forState:UIControlStateNormal];
-                
-            } else if ((slider.origin.x<=-30)&&(slider.origin.x>=-60)) {
-                [self moveBack:slider.origin.x];
-            } else if ((slider.origin.x>-30)&&(slider.origin.x<=0)){
-                [self moveRight:slider.origin.x];
+            CGFloat centerOfMovement = -30;
+            CGFloat magicCoefficient = 4;
+            if ((view.origin.x+velocity.x/magicCoefficient<=centerOfMovement)&&(view.origin.x>=leftBorderOfView)) {
+                [self moveBack:view.origin.x];
+            } else if ((view.origin.x+velocity.x/magicCoefficient>centerOfMovement)&&(view.origin.x<=0)){
+                [self moveRight:view.origin.x];
             }
-            break;
         }
         default:
             break;
