@@ -36,21 +36,21 @@
 - (IBAction)clicked:(id)sender {
     UIButton *button = sender;
     if ([button.titleLabel.text isEqualToString:@"hide"]) {
-        [self.myButton setTitle:@"show" forState:UIControlStateNormal];
         [self moveBack:leftBorderOfView];
     } else if ([button.titleLabel.text isEqualToString:@"show"]){
-        [self.myButton setTitle:@"hide" forState:UIControlStateNormal];
         [self moveRight:leftBorderOfView];
     }
 }
 -(void)moveRight:(CGFloat)transition{
     [UIView animateWithDuration:0.4 animations:^{
+        [self.myButton setTitle:@"hide" forState:UIControlStateNormal];
         CGRect rect = self.secondView.frame;
         self.secondView.frame = CGRectMake(0,rect.origin.y, rect.size.width, rect.size.height);
     }];
 }
 -(void)moveBack:(CGFloat)transition{
     [UIView animateWithDuration:0.4 animations:^{
+        [self.myButton setTitle:@"show" forState:UIControlStateNormal];
         CGRect rect = self.secondView.frame;
         self.secondView.frame = CGRectMake(leftBorderOfView,rect.origin.y, rect.size.width, rect.size.height);
     }];
@@ -67,13 +67,13 @@
         case UIGestureRecognizerStateChanged:{
                 CGFloat leftBorderForCenterOfView = 100;
                 CGFloat rightBorderForCenterOfView = 160;
-                CGPoint newView = CGPointMake(self.secondView.center.x + translatedPoint.x, self.secondView.center.y);
-                if (newView.x>rightBorderForCenterOfView){
-                    newView.x=rightBorderForCenterOfView;
-                } else if (newView.x<leftBorderForCenterOfView){
-                    newView.x = leftBorderForCenterOfView;
+                CGPoint newPositionOfView = CGPointMake(self.secondView.center.x + translatedPoint.x, self.secondView.center.y);
+                if (newPositionOfView.x>rightBorderForCenterOfView){
+                    newPositionOfView.x=rightBorderForCenterOfView;
+                } else if (newPositionOfView.x<leftBorderForCenterOfView){
+                    newPositionOfView.x = leftBorderForCenterOfView;
                 }
-                self.secondView.center = newView;
+                self.secondView.center = newPositionOfView;
                 NSLog(@"view: %f", view.origin.x);
                 [pan setTranslation:CGPointMake(0, 0) inView:self.secondView];
             break;
